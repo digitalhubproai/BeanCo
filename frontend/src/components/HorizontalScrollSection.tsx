@@ -50,15 +50,16 @@ export default function HorizontalScrollSection() {
     if (!section || !container) return;
 
     let ctx = gsap.context(() => {
+      const isMobile = window.innerWidth < 768;
       const totalWidth = container.scrollWidth - window.innerWidth;
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
-          pin: true,
+          pin: !isMobile,
           scrub: 1,
           start: "top top",
-          end: () => `+=${container.scrollWidth}`,
+          end: () => isMobile ? `+=${totalWidth}` : `+=${container.scrollWidth}`,
         }
       });
 
@@ -84,14 +85,14 @@ export default function HorizontalScrollSection() {
         const slideTl = gsap.timeline({
             scrollTrigger: {
                 trigger: slide,
-                containerAnimation: tl,
-                start: "left 70%", // Start revealing when slide enters from right
-                end: "right 30%",  // Start hiding when slide exits to left
+                containerAnimation: isMobile ? null : tl,
+                start: "left 70%",
+                end: "right 30%",
                 scrub: true,
             }
         });
 
-        // Entrance: Text slides up and image brightens
+        // Entrance
         slideTl.fromTo(content, 
             { y: 60, opacity: 0 }, 
             { y: 0, opacity: 1, duration: 1, ease: "power2.out" }, 
@@ -99,7 +100,7 @@ export default function HorizontalScrollSection() {
         );
         slideTl.to(img, { filter: "brightness(0.9)", duration: 1 }, 0);
 
-        // Exit: Text fades out as it leaves the center
+        // Exit
         slideTl.to(content, { y: -40, opacity: 0, duration: 1, ease: "power2.in" }, 2);
         slideTl.to(img, { filter: "brightness(0.3)", duration: 1 }, 2);
       });
